@@ -91,7 +91,8 @@ pipeline {
                sizeInMB =  (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
             }
             
-         
+
+           echo "${sizeInMB}"
 
             if (sizeInMB > MAX_SIZE_MB) {
                 echo "Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
