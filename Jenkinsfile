@@ -65,37 +65,29 @@ pipeline {
         stage('Size Check and Push') {
             steps {
               script {
-            def imageSizeStr = sh(
-                script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
-                returnStdout: true
-            ).trim()
+                def imageSizeStr = sh(
+                    script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
+                    returnStdout: true
+                ).trim()
+                
+                echo "Docker reported size: ${imageSizeStr}"
+                
+                // Extract numeric part and unit
+                def value = (imageSizeStr.find(/[\d.]+/) ?: "0") as BigDecimal
+                def unit = (imageSizeStr.find(/[A-Za-z]+/) ?: "MB")  // default MB if not found
+                
+                def sizeInMB = 0
+                
+                if (unit == 'GB') {
+                    sizeInMB = value * 1024
+                } else if (unit == 'KB') {
+                    sizeInMB = value / 1024
+                } else { // MB or unknown
+                    sizeInMB = value
+                }
+                
+                echo "Converted Docker image size: ${sizeInMB} MB"
 
-            echo "Docker reported size: ${imageSizeStr}"
-
-
-            
-
-         
-         
-            def sizeInMB = 0
-            
-            
-            if (imageSizeStr.contains('GB')) {
-                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
-                sizeInMB = sizeInMB * 1024
-            } 
-                  
-            else if (unit.contains('KB')) {
-                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
-                sizeInMB = sizeInMB / 1024
-            }
-                  
-            else{
-               sizeInMB =  (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
-            }
-            
-
-           echo "${sizeInMB}"
 
             if (sizeInMB > MAX_SIZE_MB) {
                 echo "Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
