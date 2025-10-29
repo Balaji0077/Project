@@ -65,16 +65,19 @@ pipeline {
         stage('Size Check and Push') {
             steps {
               script {
-                def imageSizeStr = sh(
+               def imageSizeStr = sh(
                     script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
                     returnStdout: true
                 ).trim()
                 
                 echo "Docker reported size: ${imageSizeStr}"
                 
-                // Extract numeric part and unit
-                def value = (imageSizeStr.find(/[\d.]+/) ?: "0") as BigDecimal
-                def unit = (imageSizeStr.find(/[A-Za-z]+/) ?: "MB")  // default MB if not found
+                // Extract numeric and unit parts
+                def numStr = imageSizeStr.find(/[\d.]+/) ?: "0"
+                def unit = imageSizeStr.find(/[A-Za-z]+/) ?: "MB"
+                
+                // Convert string to BigDecimal safely
+                def value = new BigDecimal(numStr)
                 
                 def sizeInMB = 0
                 
@@ -84,9 +87,9 @@ pipeline {
                     sizeInMB = value / 1024
                 } else { // MB or unknown
                     sizeInMB = value
-                }
-                
-                echo "Converted Docker image size: ${sizeInMB} MB"
+             }
+
+echo "Converted Docker image size: ${sizeInMB.setScale(2, BigDecimal.ROUND_HALF_UP)} MB"
 
 
             if (sizeInMB > MAX_SIZE_MB) {
