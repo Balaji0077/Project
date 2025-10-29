@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_NAME = "gitrebase-app"
         REGISTRY = "balaji0077/project"
-        MAX_SIZE_MB = 200
+        MAX_SIZE_MB = "200"
         FEATURE_BRANCH = "feature"
         MAIN_BRANCH = "master"
     }
@@ -72,16 +72,13 @@ pipeline {
 
             echo "Docker reported size: ${imageSizeStr}"
 
-            // Extract only digits and dot (e.g., "95.4" from "95.4MB")
-            def cleanStr = imageSizeStr.replaceAll('[^0-9.]', '')
-            def unit = imageSizeStr.toUpperCase()
+            def num = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+            
+           echo "${num}"
 
-            // Safe numeric parsing using Groovy arithmetic (sandbox safe)
+         
             def sizeInMB = 0
-            if (cleanStr?.trim()) {
-                // multiply/divide by 1.0 to force numeric context safely
-                sizeInMB = (cleanStr as BigDecimal) * 1.0
-            }
+            
 
             if (unit.contains('GB')) {
                 sizeInMB = sizeInMB * 1024
