@@ -84,19 +84,24 @@ pipeline {
                 ).trim()
                 
                 echo "Docker reported size: ${imageSizeStr}"
+
+                  def input = imageSizeStr.trim()
                 
-               def num = new BigDecimal(imageSizeStr) 
+                  def numStr = (input.find(/[\d.]+/) ?: "0").trim() 
+
+                  def unit = (input.find(/[A-Za-z]+/) ?: "MB").trim().toUpperCase() 
+
+                  def value = BigDecimal.valueOf(Double.parseDouble(numStr)) 
+                  
+                  def sizeInMB = value
+                  
+                    if (unit == 'GB') {
+                        sizeInMB = value * 1024
+                    } else if (unit == 'KB') {
+                        sizeInMB = value / 1024
+                    }
                 
                 
-                
-                
-                def sizeInMB = num
-                
-                if ("mb" in imageSizeStr.toLowerCase()) {
-                    sizeInMB = num * 1024
-                } else if ("kb" in imageSizeStr.toLowerCase()) {
-                    sizeInMB = num / 1024
-                }
 
 
             
