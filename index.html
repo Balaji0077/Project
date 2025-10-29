@@ -4,17 +4,25 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Happy Diwali — Festival of Lights</title>
-  <meta name="description" content="Celebrate Diwali with lights, colors, sweets and joy. A simple single-file Diwali website." />
+  <meta name="description" content="Celebrate Diwali with lights, colors, sweets and joy. A simple single-file Diwali website with light/dark mode." />
   <style>
     :root{
       --bg:#0b1020;
       --card:#0f1724;
       --accent:#ffbf00;
       --muted:#9aa4b2;
-      --glass: rgba(255,255,255,0.04);
+      --text:#eef2ff;
     }
+    [data-theme="light"]{
+      --bg:#fff9e6;
+      --card:#ffffff;
+      --accent:#ff8800;
+      --muted:#333;
+      --text:#111;
+    }
+
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,'Helvetica Neue',Arial;color:#eef2ff;background: radial-gradient(1200px 400px at 10% 10%, rgba(255,191,0,0.08), transparent 8%), radial-gradient(900px 300px at 90% 80%, rgba(255,0,110,0.03), transparent 5%), var(--bg);-webkit-font-smoothing:antialiased}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,'Helvetica Neue',Arial;color:var(--text);background:var(--bg);transition:background 0.4s,color 0.4s;}
     header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem}
     .brand{display:flex;gap:.75rem;align-items:center}
     .logo{width:52px;height:52px;display:inline-grid;place-items:center;border-radius:12px;background:linear-gradient(135deg,var(--accent),#ff6b81);box-shadow:0 6px 24px rgba(255,191,0,0.08), inset 0 -3px 8px rgba(0,0,0,0.25)}
@@ -24,223 +32,64 @@
 
     .container{max-width:1100px;margin:0 auto;padding:1rem}
 
-    .hero{display:grid;grid-template-columns:1fr 420px;gap:1.5rem;align-items:center;margin-top:1rem}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:1.25rem;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,0.03)}
+    .card{background:var(--card);border-radius:14px;padding:1.25rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);transition:background 0.4s;}
+    .btn{padding:.65rem .9rem;border-radius:10px;border:0;cursor:pointer;font-weight:600;transition:background 0.3s,color 0.3s}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#ff6b81);color:#fff;}
+    .btn-ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,191,0,0.3)}
 
-    .hero-left h2{font-size:2rem;margin:.25rem 0}
-    .hero-left p{color:var(--muted);line-height:1.6}
-    .actions{display:flex;gap:.75rem;margin-top:1rem}
-    .btn{padding:.65rem .9rem;border-radius:10px;border:0;cursor:pointer;font-weight:600}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),#ff6b81);color:#081026}
-    .btn-ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,191,0,0.12)}
+    footer{text-align:center;color:var(--muted);margin:2rem 0}
 
-    /* Diya illustration column */
-    .diya-wrap{display:flex;flex-direction:column;align-items:center;gap:1rem}
-    .diya{width:100%;max-width:360px}
-
-    /* gallery */
-    .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:1rem}
-    .tile{border-radius:10px;overflow:hidden;height:100px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.15));display:flex;align-items:center;justify-content:center}
-    .tile svg{width:70px;height:70px}
-
-    footer{margin:2rem 0;text-align:center;color:var(--muted)}
-
-    /* fireworks */
-    .fireworks{position:fixed;left:0;top:0;right:0;bottom:0;pointer-events:none;z-index:5}
-    .firework{position:absolute;border-radius:50%;mix-blend-mode:screen;opacity:0}
-
-    /* responsive */
-    @media (max-width:980px){.hero{grid-template-columns:1fr;}.diya-wrap{order:-1}.gallery{grid-template-columns:repeat(2,1fr)}.tile{height:90px}}
-    @media (max-width:520px){.gallery{grid-template-columns:repeat(1,1fr)}.diya{max-width:280px}} 
-
-    /* simple glowing diya flame */
-    .flame{filter:drop-shadow(0 6px 12px rgba(255,160,50,0.25))}
-
-    /* decorative ribbons */
-    .ribbon{position:fixed;left:0;right:0;top:0;height:28px;background:linear-gradient(90deg, rgba(255,191,0,0.07), rgba(255,110,140,0.03));pointer-events:none}
-
-    /* small accessibility focus */
-    a:focus, button:focus{outline:3px solid rgba(255,191,0,0.18);outline-offset:2px}
-
+    .toggle-mode{margin-left:.75rem;cursor:pointer;border:1px solid rgba(255,191,0,0.2);border-radius:8px;padding:.45rem .7rem;background:transparent;color:var(--accent);}
   </style>
 </head>
 <body>
-  <div class="ribbon" aria-hidden="true"></div>
   <header class="container">
     <div class="brand">
-      <div class="logo" aria-hidden="true">
-        <!-- small diya icon -->
+      <div class="logo">
         <svg viewBox="0 0 48 48" width="34" height="34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M24 40c-6.627 0-12-3.582-12-8 0-2.93 2.686-5.518 7.046-6.786 2.25-.7 4.564-1.214 4.954-1.214.39 0 2.704.515 4.954 1.214C33.314 26.482 36 29.07 36 32c0 4.418-5.373 8-12 8z" fill="#ffcf66" /><path d="M30 20c0 3-6 6-6 6s-6-3-6-6a6 6 0 1112 0z" fill="#ff6b81"/></svg>
       </div>
       <div>
         <h1 class="site-title">Happy Diwali</h1>
-        <p class="tag">Festival of Lights — warmth, sweets & togetherness</p>
+        <p class="tag">Festival of Lights — now in Light & Dark mode</p>
       </div>
     </div>
-    <nav aria-label="Main navigation">
-      <button class="btn btn-ghost" id="toggleSound">🔊 Sound</button>
-      <button class="btn btn-ghost" id="toggleFire">✨ Fireworks</button>
-    </nav>
+    <div>
+      <button class="btn btn-ghost" id="toggleMode">🌙 Toggle Mode</button>
+    </div>
   </header>
 
   <main class="container">
-    <section class="hero">
-      <div class="card hero-left">
-        <h2>Light every diya. Share every smile.</h2>
-        <p>Wishing you and your family a very happy Diwali — may your life be as bright and joyful as the festival of lights. Enjoy beautiful decorations, warm sweets, and sparkling fireworks.</p>
-        <div class="actions">
-          <button class="btn btn-primary" id="greetBtn">Send Greeting</button>
-          <a class="btn btn-ghost" href="#gallery">See Lights</a>
-        </div>
-
-        <div class="gallery" id="gallery" aria-live="polite">
-          <div class="tile" title="Rangoli">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="none" stroke="#ffbf66" stroke-width="2"/><path d="M32 8v48M8 32h48M14 14l36 36M50 14L14 50" stroke="#ff6b81" stroke-width="2" stroke-linecap="round"/></svg>
-          </div>
-          <div class="tile" title="Diya">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><path d="M32 44c-8 0-18-3-20-9 6-1 14-5 20-5s14 4 20 5c-2 6-12 9-20 9z" fill="#ffcf66"/><path d="M26 32c0-4 6-8 6-8s6 4 6 8-6 6-6 6-6-2-6-6z" fill="#ff6b81"/></svg>
-          </div>
-          <div class="tile" title="Sweets">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="18" width="44" height="28" rx="6" fill="#ffd9b3"/><circle cx="22" cy="32" r="4" fill="#ff6b81"/><circle cx="32" cy="32" r="4" fill="#ff6b81"/><circle cx="42" cy="32" r="4" fill="#ff6b81"/></svg>
-          </div>
-        </div>
-
-      </div>
-
-      <aside class="card diya-wrap" aria-hidden="false">
-        <div class="diya" role="img" aria-label="Decorative diya illustration">
-          <!-- Decorative Diya: SVG with subtle animation -->
-          <svg viewBox="0 0 360 300" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="g1" cx="50%" cy="40%">
-                <stop offset="0%" stop-color="#fff7e6" stop-opacity="1"/>
-                <stop offset="60%" stop-color="#ffd68a" stop-opacity="1"/>
-                <stop offset="100%" stop-color="#ff9f66" stop-opacity="1"/>
-              </radialGradient>
-            </defs>
-            <g transform="translate(30,20)">
-              <path d="M60 210 C40 170, 20 140, 40 120 C90 80, 160 80, 210 120 C230 140, 210 170, 190 210 Z" fill="#5a2e0c"/>
-              <path d="M55 180 C75 140, 120 120, 160 120 C200 120, 245 140, 265 180 L160 210 Z" fill="url(#g1)" class="flame" opacity="0.98">
-                <animate attributeName="opacity" values="0.85;1;0.85" dur="1.4s" repeatCount="indefinite"/>
-                <animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.4s" repeatCount="indefinite"/>
-              </path>
-              <!-- small sparkles -->
-              <g>
-                <circle cx="30" cy="30" r="3" fill="#ffd68a"><animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.2s"/></circle>
-                <circle cx="80" cy="12" r="2" fill="#ff6b81"><animate attributeName="opacity" values="0;1;0" dur="1.6s" repeatCount="indefinite" begin="0.6s"/></circle>
-                <circle cx="140" cy="40" r="2.5" fill="#ffdfbf"><animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite" begin="0.9s"/></circle>
-              </g>
-            </g>
-          </svg>
-        </div>
-        <div style="text-align:center;color:var(--muted);font-size:.95rem">Light a diya, make a wish</div>
-      </aside>
-    </section>
-
-    <section class="card" style="margin-top:1.25rem">
-      <h3 style="margin-top:0">About Diwali</h3>
-      <p style="color:var(--muted)">Diwali, the festival of lights, is celebrated across India and many parts of the world. It represents the victory of light over darkness and good over evil — families come together, decorate homes, make sweets, and light lamps (diyas).</p>
-    </section>
-
-    <section class="card" style="margin-top:1rem;display:flex;gap:1rem;flex-direction:column;align-items:center">
-      <h3 style="margin:0">Share a greeting</h3>
-      <p style="color:var(--muted);margin:.25rem 0 1rem 0">Click the button to copy a festive greeting to your clipboard.</p>
-      <input id="greetInput" value="Wishing you a very Happy Diwali! May your life be filled with light and joy." style="width:100%;max-width:680px;padding:.7rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit"/>
-    </section>
-
+    <div class="card">
+      <h2>Light every diya. Share every smile.</h2>
+      <p>Celebrate Diwali your way — whether in bright daylight or glowing moonlight. Switch between light and dark themes anytime!</p>
+    </div>
   </main>
 
   <footer class="container">
-    <div class="card" style="display:inline-block;padding:.75rem 1rem">Made with ❤️ — Happy Diwali</div>
+    <div class="card" style="display:inline-block;padding:.75rem 1rem">Made with ❤️ — Happy Diwali (Light/Dark Mode Feature Branch)</div>
   </footer>
 
-  <div class="fireworks" id="fireworks" aria-hidden="true"></div>
-
   <script>
-    // Simple interactivity: copy greeting, toggle fireworks, toggle sound
-    const greetBtn = document.getElementById('greetBtn');
-    const greetInput = document.getElementById('greetInput');
-    const fireworks = document.getElementById('fireworks');
-    const toggleFire = document.getElementById('toggleFire');
-    const toggleSound = document.getElementById('toggleSound');
-    let fireOn = false;
-    let soundOn = false;
-
-    greetBtn.addEventListener('click', async ()=>{
-      try{
-        await navigator.clipboard.writeText(greetInput.value);
-        greetBtn.textContent = 'Copied ✓';
-        setTimeout(()=>greetBtn.textContent='Send Greeting',1500);
-      }catch(e){
-        alert('Copy failed — please select and copy manually.');
+    const toggleModeBtn = document.getElementById('toggleMode');
+    toggleModeBtn.addEventListener('click',()=>{
+      const currentTheme = document.body.getAttribute('data-theme');
+      if(currentTheme === 'light'){
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme','dark');
+        toggleModeBtn.textContent = '🌙 Dark Mode';
+      }else{
+        document.body.setAttribute('data-theme','light');
+        localStorage.setItem('theme','light');
+        toggleModeBtn.textContent = '☀️ Light Mode';
       }
     });
 
-    toggleFire.addEventListener('click', ()=>{
-      fireOn = !fireOn; toggleFire.textContent = fireOn ? '✨ Fireworks (On)' : '✨ Fireworks';
-      if(fireOn) startFireworks(); else stopFireworks();
-    });
-
-    toggleSound.addEventListener('click', ()=>{
-      soundOn = !soundOn; toggleSound.textContent = soundOn ? '🔊 Sound (On)' : '🔊 Sound';
-      if(soundOn){
-        // play a short chime if allowed
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'sine'; o.frequency.value = 660; o.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.0001, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime+0.02);
-        o.start(); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.6);
-        setTimeout(()=>{ o.stop(); ctx.close(); },700);
-      }
-    });
-
-    // Fireworks generator (lightweight)
-    let fwInterval;
-    function rand(min,max){return Math.random()*(max-min)+min}
-    function createFirework(x,y,colors){
-      const n = Math.floor(rand(8,20));
-      for(let i=0;i<n;i++){
-        const el = document.createElement('div');
-        el.className='firework';
-        const size = Math.floor(rand(6,18));
-        el.style.width = el.style.height = size+'px';
-        el.style.left = (x + rand(-30,30)) + 'px';
-        el.style.top = (y + rand(-30,30)) + 'px';
-        el.style.background = colors[Math.floor(rand(0,colors.length))];
-        el.style.opacity = 0;
-        fireworks.appendChild(el);
-        // animate
-        const dur = rand(600,1400);
-        el.animate([
-          {transform:'translateY(0) scale(0.6)', opacity:1},
-          {transform:`translateY(${rand(-80,-160)}px) scale(1)`, opacity:0}
-        ],{duration:dur, easing:'cubic-bezier(.2,.8,.2,1)'})
-        setTimeout(()=>{ el.remove() }, dur+50);
-      }
+    // On load restore last theme
+    const savedTheme = localStorage.getItem('theme');
+    if(savedTheme==='light'){
+      document.body.setAttribute('data-theme','light');
+      toggleModeBtn.textContent = '☀️ Light Mode';
     }
-
-    function startFireworks(){
-      if(fwInterval) return;
-      fwInterval = setInterval(()=>{
-        const w = window.innerWidth; const h = window.innerHeight;
-        const x = rand(0.1*w,0.9*w); const y = rand(0.05*h,0.5*h);
-        createFirework(x,y,['#ffd66b','#ff6b81','#ffdfbf','#b5ffcc','#7aa2ff']);
-      }, 700);
-    }
-    function stopFireworks(){ clearInterval(fwInterval); fwInterval=null; }
-
-    // generate a couple by default for subtlety
-    setTimeout(()=>{ createFirework(window.innerWidth*0.5, window.innerHeight*0.25,['#ffd66b','#ff6b81']); }, 500);
-
-    // accessibility: keyboard shortcut (g to copy, f to toggle fireworks)
-    document.addEventListener('keydown', (e)=>{
-      if(e.key==='g') greetBtn.click();
-      if(e.key==='f') toggleFire.click();
-      if(e.key==='s') toggleSound.click();
-    });
-
   </script>
 </body>
 </html>
-
