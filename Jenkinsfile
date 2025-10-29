@@ -57,7 +57,8 @@ pipeline {
                 script {
                     
                     sh """
-                        docker build --squash -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                        export DOCKER_BUILDKIT=1
+                        docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
                     """
                 }
             }
