@@ -18,6 +18,8 @@ pipeline {
                 echo "Cloning repository..."
                 checkout scm
                 sh '''
+                   git config user.name "Balaji0077"
+                    git config user.email "balajisugur@gmail.com"
                     git fetch origin ${MAIN_BRANCH}
                     git fetch origin ${FEATURE_BRANCH}
                     git log --oneline -3
