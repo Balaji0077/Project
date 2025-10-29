@@ -87,14 +87,14 @@ pipeline {
                 
                def num = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
                 
-                // Convert safely using Double.parseDouble()
+                
                 
                 
                 def sizeInMB = num
                 
-                if (unit == 'GB') {
+                if (imageSizeStr.toLowerCase().contains("gb")) {
                     sizeInMB = num * 1024
-                } else if (unit == 'KB') {
+                } else if (imageSizeStr.toLowerCase().contains("kb")) {
                     sizeInMB = num / 1024
                 }
 
