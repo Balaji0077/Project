@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_NAME = "gitrebase-app"
         REGISTRY = "balaji0077/project"
-        MAX_SIZE_MB = "200"
+        MAX_SIZE_MB = 200
         FEATURE_BRANCH = "feature"
         MAIN_BRANCH = "master"
     }
@@ -74,26 +74,29 @@ pipeline {
 
             def num = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
             
-           echo "${num}"
+          
 
          
             def sizeInMB = 0
             
-
-            if (unit.contains('GB')) {
-                sizeInMB = sizeInMB * 1024
+            
+            if (imageSizeStr.contains('GB')) {
+                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal * 1024
             } else if (unit.contains('KB')) {
-                sizeInMB = sizeInMB / 1024
+                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal / 1024
             }
-
-            echo "Calculated image size: ${sizeInMB} MB"
+            else{
+               sizeInMB =  (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+            }
+            
+         
 
             if (sizeInMB > MAX_SIZE_MB) {
-                echo "❌ Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
+                echo "Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
                 currentBuild.result = 'ABORTED'
                 error("Build aborted due to image size exceeding ${MAX_SIZE_MB}MB.")
             } else {
-                echo "✅ Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
+                echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub-creds',
                     usernameVariable: 'DH_USER',
