@@ -88,6 +88,8 @@ pipeline {
                 def num = (imageSizeStr =~ /\d+/)[0] as Integer
 
                 def sizeInMB = num
+
+                  echo "${sizeInMB}"
                   
                 
             if (sizeInMB > MAX_SIZE_MB) {
