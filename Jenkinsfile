@@ -72,22 +72,23 @@ pipeline {
                 
                 echo "Docker reported size: ${imageSizeStr}"
                 
-                // Extract numeric and unit parts
-                def numStr = imageSizeStr.find(/[\d.]+/) ?: "0"
-                def unit = imageSizeStr.find(/[A-Za-z]+/) ?: "MB"
+                // Extract numeric and unit parts safely
+                def numStr = (imageSizeStr.find(/[\d.]+/) ?: "0").trim()
+                def unit = (imageSizeStr.find(/[A-Za-z]+/) ?: "MB").trim()
                 
-                // Convert string to BigDecimal safely
-                def value = new BigDecimal(numStr)
+                // Convert safely using Double.parseDouble()
+                def value = BigDecimal.valueOf(Double.parseDouble(numStr))
                 
-                def sizeInMB = 0
+                def sizeInMB = value
                 
                 if (unit == 'GB') {
                     sizeInMB = value * 1024
                 } else if (unit == 'KB') {
                     sizeInMB = value / 1024
-                } else { // MB or unknown
-                    sizeInMB = value
-             }
+                }
+
+
+             
 
 echo "Converted Docker image size: ${sizeInMB.setScale(2, BigDecimal.ROUND_HALF_UP)} MB"
 
