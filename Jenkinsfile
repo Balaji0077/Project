@@ -84,11 +84,10 @@ pipeline {
                         error("Build aborted due to image size exceeding limit.")
                     } else {
                         echo "Image size OK (${sizeValue}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
-                        withCredentials([usernamePassword(credentialsId: 'docker-hub-creds',
-                                                          usernameVariable: 'balaji0077',
-                                                          passwordVariable: 'dckr_pat_p_aEoLw-CkHKuIVaK4Qb1NORKlw')]) {
+                         DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') 
+                         {
                             sh '''
-                                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                echo "$DOCKER_PASS" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
                                 docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
                                 docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
                                 docker logout
@@ -99,6 +98,7 @@ pipeline {
             }
         }
     }
+  
 
     post {
         success {
