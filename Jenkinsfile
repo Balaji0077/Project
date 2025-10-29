@@ -56,7 +56,7 @@ pipeline {
                 echo "Building optimized Docker image with squashed layers..."
                 script {
                     sh """
-                        docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} .
+                        docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
                     """
                 }
             }
@@ -93,13 +93,15 @@ pipeline {
                 //     }
                 // }
 
-                echo ":closed_lock_with_key: Logging in and pushing image to Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
                     sh '''
                         echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                        docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${DH_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker push ${DH_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker logout
                     '''
                 }
+                
             }
         }
 
