@@ -85,7 +85,7 @@ pipeline {
                 
                 echo "Docker reported size: ${imageSizeStr}"
                 
-               def num = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+               def num = new BigDecimal(imageSizeStr) 
                 
                 
                 
