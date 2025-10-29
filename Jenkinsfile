@@ -74,13 +74,17 @@ pipeline {
                     echo "Built Image Size: ${imageSizeStr}"
 
                      def sizeInMB = 0.0
-                     if (imageSizeStr.endsWith("GB")) {
-                         sizeInMB = imageSizeStr.replace("GB", "").toFloat() * 1024
-                       } else if (imageSizeStr.endsWith("MB")) {
-                           sizeInMB = imageSizeStr.replace("MB", "").toFloat()
-                      } else if (imageSizeStr.endsWith("kB")) {
-                        sizeInMB = imageSizeStr.replace("kB", "").toFloat() / 1024
-                      }
+                        def cleanStr = imageSizeStr.replaceAll("[^0-9\\.]", "")  // remove everything except digits & dots
+            
+                        if (imageSizeStr.toUpperCase().contains("GB")) {
+                            sizeInMB = Float.parseFloat(cleanStr) * 1024
+                        } else if (imageSizeStr.toUpperCase().contains("MB")) {
+                            sizeInMB = Float.parseFloat(cleanStr)
+                        } else if (imageSizeStr.toUpperCase().contains("KB")) {
+                            sizeInMB = Float.parseFloat(cleanStr) / 1024
+                        } else {
+                            echo "Unknown size format: '${imageSizeStr}', defaulting to 0MB"
+                        }
 
                     if (sizeInMB > MAX_SIZE_MB) {
                         echo "Image too large: ${imageSizeStr}. Allowed: ${MAX_SIZE_MB}MB"
