@@ -96,12 +96,12 @@ pipeline {
                         
                  
                 //}
-                echo ":closed_lock_with_key: Logging in and pushing image to Docker Hub..."
-               withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-                sh '''
-            echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-            docker push ${IMAGE_NAME}:${BUILD_NUMBER}
-          '''
+                  echo ":closed_lock_with_key: Logging in and pushing image to Docker Hub..."
+                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                 sh '''
+                 echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                   docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                  '''
             }
         }
     }
