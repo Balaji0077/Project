@@ -64,8 +64,7 @@ pipeline {
 
         stage('Size Check and Push') {
             steps {
-               script {
-           
+              script {
             def imageSizeStr = sh(
                 script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
                 returnStdout: true
@@ -73,31 +72,31 @@ pipeline {
 
             echo "Docker reported size: ${imageSizeStr}"
 
-            // ✅ Extract numeric part safely (no static method calls)
+            // Extract only digits and dot (e.g., "95.4" from "95.4MB")
             def cleanStr = imageSizeStr.replaceAll('[^0-9.]', '')
-            def sizeInMB = 0.0
+            def unit = imageSizeStr.toUpperCase()
 
-            // ✅ Simple numeric conversion (sandbox-safe)
-            if (cleanStr && cleanStr.isNumber()) {
-                sizeInMB = cleanStr.toDouble()
+            // Safe numeric parsing using Groovy arithmetic (sandbox safe)
+            def sizeInMB = 0
+            if (cleanStr?.trim()) {
+                // multiply/divide by 1.0 to force numeric context safely
+                sizeInMB = (cleanStr as BigDecimal) * 1.0
             }
 
-            // ✅ Adjust units manually (still sandbox safe)
-            if (imageSizeStr.toUpperCase().contains('GB')) {
+            if (unit.contains('GB')) {
                 sizeInMB = sizeInMB * 1024
-            } else if (imageSizeStr.toUpperCase().contains('KB')) {
+            } else if (unit.contains('KB')) {
                 sizeInMB = sizeInMB / 1024
             }
 
-            echo "Calculated size (MB): ${sizeInMB}"
+            echo "Calculated image size: ${sizeInMB} MB"
 
             if (sizeInMB > MAX_SIZE_MB) {
-                echo "❌ Image too large: ${sizeInMB}MB (Limit: ${MAX_SIZE_MB}MB)"
+                echo "❌ Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
                 currentBuild.result = 'ABORTED'
                 error("Build aborted due to image size exceeding ${MAX_SIZE_MB}MB.")
             } else {
                 echo "✅ Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
-
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub-creds',
                     usernameVariable: 'DH_USER',
@@ -113,9 +112,7 @@ pipeline {
             }
         }
                 
-                   
-
-               
+                       
                 
             }
         }
