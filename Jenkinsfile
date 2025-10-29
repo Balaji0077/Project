@@ -76,15 +76,18 @@ pipeline {
             
 
          
+         
             def sizeInMB = 0
             
             
             if (imageSizeStr.contains('GB')) {
-                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal * 1024
+                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+                sizeInMB = sizeInMB * 1024
             } 
                   
             else if (unit.contains('KB')) {
-                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal / 1024
+                sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+                sizeInMB = sizeInMB / 1024
             }
                   
             else{
