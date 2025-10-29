@@ -65,7 +65,7 @@ pipeline {
         stage('Size Check and Push') {
             steps {
 
-                echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
+                // echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub-creds',
                     usernameVariable: 'DH_USER',
@@ -78,6 +78,7 @@ pipeline {
                         docker logout
                     '''
                 }
+                
                 
         //       script {
         //        def imageSizeStr = sh(
