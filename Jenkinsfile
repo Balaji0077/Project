@@ -77,11 +77,11 @@ pipeline {
                         def cleanStr = imageSizeStr.replaceAll("[^0-9\\.]", "")  // remove everything except digits & dots
             
                         if (imageSizeStr.toUpperCase().contains("GB")) {
-                            sizeInMB = Float.parseFloat(cleanStr) * 1024
+                            sizeInMB = cleanStr.toBigDecimal().floatValue() * 1024
                         } else if (imageSizeStr.toUpperCase().contains("MB")) {
-                            sizeInMB = Float.parseFloat(cleanStr)
+                            sizeInMB = cleanStr.toBigDecimal().floatValue()
                         } else if (imageSizeStr.toUpperCase().contains("KB")) {
-                            sizeInMB = Float.parseFloat(cleanStr) / 1024
+                            sizeInMB = cleanStr.toBigDecimal().floatValue()/ 1024
                         } else {
                             echo "Unknown size format: '${imageSizeStr}', defaulting to 0MB"
                         }
