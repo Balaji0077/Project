@@ -71,7 +71,7 @@ pipeline {
                          returnStdout: true
                      ).trim()
 
-                    echo "Built Image Size: ${imageSize}"
+                    echo "Built Image Size: ${imageSizeStr}"
 
                      def sizeInMB = 0.0
                      if (imageSizeStr.endsWith("GB")) {
