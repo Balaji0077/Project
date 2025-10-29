@@ -85,27 +85,11 @@ pipeline {
                 
                 echo "Docker reported size: ${imageSizeStr}"
 
-                  def input = imageSizeStr.trim()
-                
-                  def numStr = (input.find(/[\d.]+/) ?: "0").trim() 
+                def num = (imageSizeStr =~ /\d+/)[0] as Integer
 
-                  def unit = (input.find(/[A-Za-z]+/) ?: "MB").trim().toUpperCase() 
-
-                  def value = BigDecimal.valueOf(Double.parseDouble(numStr)) 
+                def sizeInMB = num
                   
-                  def sizeInMB = value
-                  
-                    if (unit == 'GB') {
-                        sizeInMB = value * 1024
-                    } else if (unit == 'KB') {
-                        sizeInMB = value / 1024
-                    }
                 
-                
-
-
-            
-
             if (sizeInMB > MAX_SIZE_MB) {
                 echo "Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
                 currentBuild.result = 'ABORTED'
