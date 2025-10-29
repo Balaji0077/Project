@@ -72,9 +72,8 @@ pipeline {
 
             echo "Docker reported size: ${imageSizeStr}"
 
-            def num = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+
             
-          
 
          
             def sizeInMB = 0
@@ -82,9 +81,12 @@ pipeline {
             
             if (imageSizeStr.contains('GB')) {
                 sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal * 1024
-            } else if (unit.contains('KB')) {
+            } 
+                  
+            else if (unit.contains('KB')) {
                 sizeInMB = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal / 1024
             }
+                  
             else{
                sizeInMB =  (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
             }
