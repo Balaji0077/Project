@@ -64,45 +64,56 @@ pipeline {
 
         stage('Size Check and Push') {
             steps {
-                script {
-                    def imageSizeStr = sh(
-                        script: 'docker images gitrebase-app:${BUILD_NUMBER} --format "{{.Size}}"',
-                        returnStdout: true
-                    ).trim()
-                
-                    echo "🔍 Docker reported size: '${imageSizeStr}'"
-                
-                    // Extract the numeric part (e.g., "95.3" from "95.3MB")
-                    def cleanStr = imageSizeStr.replaceAll("[^0-9.]", "")
-                    def sizeInMB = 0.0
-                
-                    if (imageSizeStr.toUpperCase().contains("GB")) {
-                        sizeInMB = (cleanStr as Float) * 1024
-                    } else if (imageSizeStr.toUpperCase().contains("MB")) {
-                        sizeInMB = (cleanStr as Float)
-                    } else if (imageSizeStr.toUpperCase().contains("KB")) {
-                        sizeInMB = (cleanStr as Float) / 1024
-                    } else {
-                        echo "Unknown size format: '${imageSizeStr}', assuming 0MB"
-                    }
-                
-                    if (sizeInMB > MAX_SIZE_MB) {
-                        echo "Image too large: ${imageSizeStr}. Allowed: ${MAX_SIZE_MB}MB"
-                        currentBuild.result = 'ABORTED'
-                        error("Build aborted due to image size exceeding limit.")
-                    }
-                    else{
+               script {
+           
+            def imageSizeStr = sh(
+                script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
+                returnStdout: true
+            ).trim()
 
-                              withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-                                sh '''
-                                    echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${DH_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
-                                    docker push ${DH_USER}/${IMAGE_NAME}:${BUILD_NUMBER}
-                                    docker logout
-                                '''
-                            }
-                    }
+            echo "Docker reported size: ${imageSizeStr}"
+
+            // ✅ Extract numeric part safely (no static method calls)
+            def cleanStr = imageSizeStr.replaceAll('[^0-9.]', '')
+            def sizeInMB = 0.0
+
+            // ✅ Simple numeric conversion (sandbox-safe)
+            if (cleanStr && cleanStr.isNumber()) {
+                sizeInMB = cleanStr.toDouble()
+            }
+
+            // ✅ Adjust units manually (still sandbox safe)
+            if (imageSizeStr.toUpperCase().contains('GB')) {
+                sizeInMB = sizeInMB * 1024
+            } else if (imageSizeStr.toUpperCase().contains('KB')) {
+                sizeInMB = sizeInMB / 1024
+            }
+
+            echo "Calculated size (MB): ${sizeInMB}"
+
+            if (sizeInMB > MAX_SIZE_MB) {
+                echo "❌ Image too large: ${sizeInMB}MB (Limit: ${MAX_SIZE_MB}MB)"
+                currentBuild.result = 'ABORTED'
+                error("Build aborted due to image size exceeding ${MAX_SIZE_MB}MB.")
+            } else {
+                echo "✅ Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
+
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-creds',
+                    usernameVariable: 'DH_USER',
+                    passwordVariable: 'DH_PASS'
+                )]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker tag ${IMAGE_NAME}:${BUILD_NUMBER} $DH_USER/${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker push $DH_USER/${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker logout
+                    '''
                 }
+            }
+        }
+                
+                   
 
                
                 
