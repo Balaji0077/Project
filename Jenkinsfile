@@ -66,24 +66,25 @@ pipeline {
         stage('Size Check and Push') {
             steps {
                 script {
-                     def imageSizeStr = sh(
-                        script: 'docker images gitrebase-app:${BUILD_NUMBER} --format "{{.Size}}"',
-                         returnStdout: true
-                     ).trim()
-
-                    echo "Built Image Size: ${imageSizeStr}"
-
-                     def sizeInMB = 0.0
-                        def cleanStr = imageSizeStr.replaceAll("[^0-9\\.]", "")  // remove everything except digits & dots
+                            def imageSizeStr = sh(
+                            script: 'docker images gitrebase-app:${BUILD_NUMBER} --format "{{.Size}}"',
+                            returnStdout: true
+                        ).trim()
+            
+                        echo "🔍 Docker reported size: '${imageSizeStr}'"
+            
+                        // Extract the numeric part (e.g., "95.3" from "95.3MB")
+                        def cleanStr = imageSizeStr.replaceAll("[^0-9.]", "")
+                        def sizeInMB = 0.0
             
                         if (imageSizeStr.toUpperCase().contains("GB")) {
-                            sizeInMB = cleanStr.toBigDecimal().floatValue() * 1024
+                            sizeInMB = (cleanStr as Float) * 1024
                         } else if (imageSizeStr.toUpperCase().contains("MB")) {
-                            sizeInMB = cleanStr.toBigDecimal().floatValue()
+                            sizeInMB = (cleanStr as Float)
                         } else if (imageSizeStr.toUpperCase().contains("KB")) {
-                            sizeInMB = cleanStr.toBigDecimal().floatValue()/ 1024
+                            sizeInMB = (cleanStr as Float) / 1024
                         } else {
-                            echo "Unknown size format: '${imageSizeStr}', defaulting to 0MB"
+                            echo "Unknown size format: '${imageSizeStr}', assuming 0MB"
                         }
 
                     if (sizeInMB > MAX_SIZE_MB) {
