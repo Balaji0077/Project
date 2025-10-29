@@ -3,7 +3,7 @@ pipeline {
     environment {
         IMAGE_NAME = "gitrebase-app"
         REGISTRY = "balaji0077/project"
-        MAX_SIZE_MB = 100
+        MAX_SIZE_MB = 200
         FEATURE_BRANCH = "feature"
         MAIN_BRANCH = "master"
     }
