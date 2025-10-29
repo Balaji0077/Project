@@ -66,10 +66,10 @@ pipeline {
         stage('Size Check and Push') {
             steps {
                 script {
-                    def imageSizeStr = sh(
-                        script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
-                        returnStdout: true
-                    ).trim()
+                     def imageSizeStr = sh(
+                        script: 'docker images gitrebase-app:${BUILD_NUMBER} --format "{{.Size}}"',
+                         returnStdout: true
+                     ).trim()
 
                     echo "Built Image Size: ${imageSize}"
 
@@ -83,7 +83,7 @@ pipeline {
                       }
 
                     if (sizeInMB > MAX_SIZE_MB) {
-                        echo "Image too large: ${imageSize}. Allowed: ${MAX_SIZE_MB}MB"
+                        echo "Image too large: ${imageSizeStr}. Allowed: ${MAX_SIZE_MB}MB"
                         currentBuild.result = 'ABORTED'
                         error("Build aborted due to image size exceeding limit.")
                     } else {
