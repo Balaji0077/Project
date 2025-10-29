@@ -7,10 +7,7 @@ pipeline {
         FEATURE_BRANCH = "feature"
         MAIN_BRANCH = "master"
     }
-    // triggers {
-    //     // Trigger automatically on feature branch changes
-    //     pollSCM('* * * * *')  // replace with webhook if available
-    // }
+   
 
     stages {
         stage('Checkout') {
@@ -53,7 +50,7 @@ pipeline {
 
         stage('Build Optimized Image') {
             steps {
-                echo "Building optimized Docker image with squashed layers..."
+                echo "Building optimized Docker image with layers..."
                 script {
                     sh """
                         docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
@@ -65,7 +62,51 @@ pipeline {
         stage('Size Check and Push') {
             steps {
 
-                // echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
+                //echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
+                // withCredentials([usernamePassword(
+                //     credentialsId: 'docker-hub-creds',
+                //     usernameVariable: 'DH_USER',
+                //     passwordVariable: 'DH_PASS'
+                // )]) {
+                //     sh '''
+                //         echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                //         docker tag ${IMAGE_NAME}:${BUILD_NUMBER} $DH_USER/${IMAGE_NAME}:${BUILD_NUMBER}
+                //         docker push $DH_USER/${IMAGE_NAME}:${BUILD_NUMBER}
+                //         docker logout
+                //     '''
+                // }
+                
+                
+              script {
+               def imageSizeStr = sh(
+                    script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
+                    returnStdout: true
+                ).trim()
+                
+                echo "Docker reported size: ${imageSizeStr}"
+                
+               def num = (imageSizeStr =~ /[\d.]+/)[0] as BigDecimal
+                
+                // Convert safely using Double.parseDouble()
+                
+                
+                def sizeInMB = num
+                
+                if (unit == 'GB') {
+                    sizeInMB = num * 1024
+                } else if (unit == 'KB') {
+                    sizeInMB = num / 1024
+                }
+
+
+            
+
+            if (sizeInMB > MAX_SIZE_MB) {
+                echo "Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
+                currentBuild.result = 'ABORTED'
+                error("Build aborted due to image size exceeding ${MAX_SIZE_MB}MB.")
+            } else {
+                echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub-creds',
                     usernameVariable: 'DH_USER',
@@ -78,57 +119,8 @@ pipeline {
                         docker logout
                     '''
                 }
-                
-                
-        //       script {
-        //        def imageSizeStr = sh(
-        //             script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
-        //             returnStdout: true
-        //         ).trim()
-                
-        //         echo "Docker reported size: ${imageSizeStr}"
-                
-        //         // Extract numeric and unit parts safely
-        //         def numStr = (imageSizeStr.find(/[\d.]+/) ?: "0").trim()
-        //         def unit = (imageSizeStr.find(/[A-Za-z]+/) ?: "MB").trim()
-                
-        //         // Convert safely using Double.parseDouble()
-        //         def value = BigDecimal.valueOf(Double.parseDouble(numStr))
-                
-        //         def sizeInMB = value
-                
-        //         if (unit == 'GB') {
-        //             sizeInMB = value * 1024
-        //         } else if (unit == 'KB') {
-        //             sizeInMB = value / 1024
-        //         }
-
-
-             
-
-        //    echo "Converted Docker image size: ${sizeInMB.setScale(2, BigDecimal.ROUND_HALF_UP)} MB"
-
-
-        //     if (sizeInMB > MAX_SIZE_MB) {
-        //         echo "Image too large: ${sizeInMB}MB (limit: ${MAX_SIZE_MB}MB)"
-        //         currentBuild.result = 'ABORTED'
-        //         error("Build aborted due to image size exceeding ${MAX_SIZE_MB}MB.")
-        //     } else {
-        //         echo "Image size OK (${sizeInMB}MB ≤ ${MAX_SIZE_MB}MB). Proceeding to push..."
-        //         withCredentials([usernamePassword(
-        //             credentialsId: 'docker-hub-creds',
-        //             usernameVariable: 'DH_USER',
-        //             passwordVariable: 'DH_PASS'
-        //         )]) {
-        //             sh '''
-        //                 echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-        //                 docker tag ${IMAGE_NAME}:${BUILD_NUMBER} $DH_USER/${IMAGE_NAME}:${BUILD_NUMBER}
-        //                 docker push $DH_USER/${IMAGE_NAME}:${BUILD_NUMBER}
-        //                 docker logout
-        //             '''
-        //         }
-        //     }
-        // }
+            }
+        }
                 
                        
                 
