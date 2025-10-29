@@ -66,26 +66,28 @@ pipeline {
         stage('Size Check and Push') {
             steps {
                 script {
-                    def imageSize = sh(
+                    def imageSizeStr = sh(
                         script: "docker images ${IMAGE_NAME}:${BUILD_NUMBER} --format '{{.Size}}'",
                         returnStdout: true
                     ).trim()
 
                     echo "Built Image Size: ${imageSize}"
 
-                    // Extract numeric part and convert to MB
-                    def sizeValue = imageSize.replaceAll('[^0-9.]', '').toFloat()
-                    def isGB = imageSize.toLowerCase().contains('gb')
-                    if (isGB) {
-                        sizeValue = sizeValue * 1024
-                    }
+                     def sizeInMB = 0.0
+                     if (imageSizeStr.endsWith("GB")) {
+                         sizeInMB = imageSizeStr.replace("GB", "").toFloat() * 1024
+                       } else if (imageSizeStr.endsWith("MB")) {
+                           sizeInMB = imageSizeStr.replace("MB", "").toFloat()
+                      } else if (imageSizeStr.endsWith("kB")) {
+                        sizeInMB = imageSizeStr.replace("kB", "").toFloat() / 1024
+                      }
 
-                    if (sizeValue > MAX_SIZE_MB) {
+                    if (sizeInMB > MAX_SIZE_MB) {
                         echo "Image too large: ${imageSize}. Allowed: ${MAX_SIZE_MB}MB"
                         currentBuild.result = 'ABORTED'
                         error("Build aborted due to image size exceeding limit.")
                     } else {
-                        echo "Image size OK (${sizeValue}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
+                        echo "Image size OK (${sizeInMB}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
                          DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') 
                          {
                             sh '''
