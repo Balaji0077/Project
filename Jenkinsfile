@@ -96,7 +96,7 @@ pipeline {
                     //     error("Build aborted due to image size exceeding limit.")
                     // } 
                     // else {
-                        echo "Image size OK (${sizeInMB}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
+                       // echo "Image size OK (${sizeInMB}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
                          DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') 
                          {
                             sh '''
