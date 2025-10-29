@@ -92,9 +92,9 @@ pipeline {
                 
                 def sizeInMB = num
                 
-                if (imageSizeStr.toLowerCase().contains("gb")) {
+                if ("mb" in imageSizeStr.toLowerCase()) {
                     sizeInMB = num * 1024
-                } else if (imageSizeStr.toLowerCase().contains("kb")) {
+                } else if ("kb" in imageSizeStr.toLowerCase()) {
                     sizeInMB = num / 1024
                 }
 
