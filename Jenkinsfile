@@ -19,10 +19,10 @@ pipeline {
                 checkout scm
                 sh '''
                    git config user.name "Balaji0077"
-                    git config user.email "balajisugur@gmail.com"
-                    git fetch origin ${MAIN_BRANCH}
-                    git fetch origin ${FEATURE_BRANCH}
-                    git log --oneline -3
+                   git config user.email "balajisugur@gmail.com"
+                   git fetch origin ${MAIN_BRANCH}
+                   git fetch origin ${FEATURE_BRANCH}
+                   git log --oneline -3
                 '''
             }
         }
@@ -55,7 +55,6 @@ pipeline {
             steps {
                 echo "Building optimized Docker image with squashed layers..."
                 script {
-                    
                     sh """
                         docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
                     """
@@ -66,46 +65,45 @@ pipeline {
         stage('Size Check and Push') {
             steps {
                 // script {
-                //             def imageSizeStr = sh(
-                //             script: 'docker images gitrebase-app:${BUILD_NUMBER} --format "{{.Size}}"',
-                //             returnStdout: true
-                //         ).trim()
-            
-                //         echo "🔍 Docker reported size: '${imageSizeStr}'"
-            
-                //         // Extract the numeric part (e.g., "95.3" from "95.3MB")
-                //         def cleanStr = imageSizeStr.replaceAll("[^0-9.]", "")
-                //         def sizeInMB = 0.0
-            
-                //         if (imageSizeStr.toUpperCase().contains("GB")) {
-                //             sizeInMB = (cleanStr as Float) * 1024
-                //         } else if (imageSizeStr.toUpperCase().contains("MB")) {
-                //             sizeInMB = (cleanStr as Float)
-                //         } else if (imageSizeStr.toUpperCase().contains("KB")) {
-                //             sizeInMB = (cleanStr as Float) / 1024
-                //         } else {
-                //             echo "Unknown size format: '${imageSizeStr}', assuming 0MB"
-                //         }
-                
-
+                //     def imageSizeStr = sh(
+                //         script: 'docker images gitrebase-app:${BUILD_NUMBER} --format "{{.Size}}"',
+                //         returnStdout: true
+                //     ).trim()
+                //
+                //     echo "🔍 Docker reported size: '${imageSizeStr}'"
+                //
+                //     // Extract the numeric part (e.g., "95.3" from "95.3MB")
+                //     def cleanStr = imageSizeStr.replaceAll("[^0-9.]", "")
+                //     def sizeInMB = 0.0
+                //
+                //     if (imageSizeStr.toUpperCase().contains("GB")) {
+                //         sizeInMB = (cleanStr as Float) * 1024
+                //     } else if (imageSizeStr.toUpperCase().contains("MB")) {
+                //         sizeInMB = (cleanStr as Float)
+                //     } else if (imageSizeStr.toUpperCase().contains("KB")) {
+                //         sizeInMB = (cleanStr as Float) / 1024
+                //     } else {
+                //         echo "Unknown size format: '${imageSizeStr}', assuming 0MB"
+                //     }
+                //
                 //     if (sizeInMB > MAX_SIZE_MB) {
                 //         echo "Image too large: ${imageSizeStr}. Allowed: ${MAX_SIZE_MB}MB"
                 //         currentBuild.result = 'ABORTED'
                 //         error("Build aborted due to image size exceeding limit.")
-                //     }         
-                        
-                 
+                //     }
                 // }
-                   echo ":closed_lock_with_key: Logging in and pushing image to Docker Hub..."
-                   withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
-                 sh '''
-                     echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                     docker push ${IMAGE_NAME}:${BUILD_NUMBER}
-                  '''
+
+                echo ":closed_lock_with_key: Logging in and pushing image to Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    '''
+                }
             }
         }
-    
-        }
+
+    } 
 
     post {
         success {
@@ -122,5 +120,4 @@ pipeline {
             sh 'docker system prune -f || true'
         }
     }
-}
 }
