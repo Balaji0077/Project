@@ -97,15 +97,16 @@ pipeline {
                     // } 
                     // else {
                        // echo "Image size OK (${sizeInMB}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
-                         DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') 
-                         {
-                            sh '''
-                                echo "$DOCKER_PASS" | docker login -u "$DOCKERHUB_CREDENTIALS_USR" --password-stdin
-                                docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
-                                docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
-                                docker logout
-                            '''
-                        }
+                         
+                        
+                            
+                                     docker.withRegistry("https://${REGISTRY}", "docker-hub-creds") {
+                                    
+                                    def built = docker.image("${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}")
+                                    built.push()
+                                }
+                            
+                        
                    // }
                 }
             }
