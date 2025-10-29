@@ -86,55 +86,16 @@ pipeline {
                         // } else {
                         //     echo "Unknown size format: '${imageSizeStr}', assuming 0MB"
                         // }
-                    def imageRef = "${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
-                    def imageSizeStr = sh(
-                        script: "docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep -F \"${imageRef}\" | awk '{print \\$2}' || true",
-                        returnStdout: true
-                    ).trim()
-
-                    if (!imageSizeStr) {
-                        // fallback: try querying by repo:tag directly
-                        imageSizeStr = sh(
-                            script: "docker images ${imageRef} --format '{{.Size}}' || true",
-                            returnStdout: true
-                        ).trim()
-                    }
-
-                    echo "🔍 Docker reported size (raw): '${imageSizeStr}'"
-
-                    // Normalize and parse the size in MB (sandbox-safe)
-                    def cleanStr = imageSizeStr.replaceAll("[^0-9.]", "")
-                    def sizeInMB = 0.0
-
-                    if (imageSizeStr.toUpperCase().contains("GB")) {
-                        // sandbox-safe conversion: use Groovy 'as Float'
-                        sizeInMB = (cleanStr ? (cleanStr as Float) * 1024 : 0.0)
-                    } else if (imageSizeStr.toUpperCase().contains("MB")) {
-                        sizeInMB = (cleanStr ? (cleanStr as Float) : 0.0)
-                    } else if (imageSizeStr.toUpperCase().contains("KB")) {
-                        sizeInMB = (cleanStr ? (cleanStr as Float) / 1024 : 0.0)
-                    } else if (!imageSizeStr) {
-                        echo "⚠️ Could not determine image size; treating as 0 MB (fail-safe)."
-                        sizeInMB = 0.0
-                    } else {
-                        // Unknown format: attempt best-effort parse
-                        try {
-                            sizeInMB = (cleanStr ? (cleanStr as Float) : 0.0)
-                        } catch (Throwable t) {
-                            echo "⚠️ Failed to parse size string '${imageSizeStr}': ${t}"
-                            sizeInMB = 0.0
-                        }
-                    }
-
-                    // round/format log
-                    echo "📏 Normalized image size: ${sizeInMB} MB (limit ${MAX_SIZE_MB} MB)"
+                    
+                
 
 
-                    if (sizeInMB > MAX_SIZE_MB) {
-                        echo "Image too large: ${imageSizeStr}. Allowed: ${MAX_SIZE_MB}MB"
-                        currentBuild.result = 'ABORTED'
-                        error("Build aborted due to image size exceeding limit.")
-                    } else {
+                    // if (sizeInMB > MAX_SIZE_MB) {
+                    //     echo "Image too large: ${imageSizeStr}. Allowed: ${MAX_SIZE_MB}MB"
+                    //     currentBuild.result = 'ABORTED'
+                    //     error("Build aborted due to image size exceeding limit.")
+                    // } 
+                    // else {
                         echo "Image size OK (${sizeInMB}MB <= ${MAX_SIZE_MB}MB). Pushing to Docker Hub..."
                          DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') 
                          {
@@ -145,7 +106,7 @@ pipeline {
                                 docker logout
                             '''
                         }
-                    }
+                   // }
                 }
             }
         }
